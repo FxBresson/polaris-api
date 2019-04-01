@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
-import { RoleSchema } from './index';
 
 const CharacterSchema = new mongoose.Schema({
     name: String,
-    role: RoleSchema
+    role: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Role'
+    }
 });
 
 export default CharacterSchema

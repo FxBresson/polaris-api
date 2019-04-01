@@ -1,13 +1,17 @@
 import mongoose from 'mongoose';
-import { MapSchema, CharacterSchema, PlayerSchema } from './index';
+import CharacterSchema from './Character';
+import PlayerSchema from './Player';
 
 const CompSchema = new mongoose.Schema({
-    phase: 'String',
+    phase: String,
     comp: [CharacterSchema]
 })
 
 const StratSchema = new mongoose.Schema({
-    map: MapSchema,
+    map: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Map'
+    },
     comp: [CompSchema]
 })
 

@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { RoleSchema } from './index';
 
 const BnetAccountSchema = new mongoose.Schema({
     btag: String,
@@ -9,9 +8,14 @@ const BnetAccountSchema = new mongoose.Schema({
 
 const PlayerSchema = new mongoose.Schema({
     mainBtag: String,
+    bnetProfileId: String,
+    token: String,
     objectives: String,
     discordAccount: String,
-    role: RoleSchema,
+    role: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Role'
+    },
     bnetAccounts: [BnetAccountSchema]
 });
 
