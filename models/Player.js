@@ -19,4 +19,6 @@ const PlayerSchema = new mongoose.Schema({
     bnetAccounts: [BnetAccountSchema]
 });
 
-export default PlayerSchema
+const Player = mongoose.model('Player', PlayerSchema);
+
+export default { PlayerSchema, Player }

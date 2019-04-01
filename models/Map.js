@@ -4,4 +4,7 @@ const MapSchema = new mongoose.Schema({
     name: String
 });
 
-export default MapSchema
+const Map = mongoose.model('Map', MapSchema);
+
+
+export default { MapSchema, Map }

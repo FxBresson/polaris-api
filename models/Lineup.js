@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import CharacterSchema from './Character';
-import PlayerSchema from './Player';
+import { CharacterSchema } from './Character';
+import { PlayerSchema } from './Player';
 
 const CompSchema = new mongoose.Schema({
     phase: String,
@@ -46,4 +46,6 @@ const LineupSchema = new mongoose.Schema({
     history: [OccurenceSchema]
 });
 
-export default LineupSchema
+const Lineup = mongoose.model('Lineup', LineupSchema);
+
+export default { LineupSchema, Lineup }

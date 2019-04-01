@@ -1,15 +1,15 @@
-import MapSchema from './Map';
-import RoleSchema from './Role';
-import CharacterSchema from './Character';
-import PlayerSchema from './Player';
-import LineupSchema from './Lineup';
-import TeamSchema from './Team';
+import { Map } from './Map';
+import { Role } from './Role';
+import { Character } from './Character';
+import { Player } from './Player';
+import { Lineup } from './Lineup';
+import { Team } from './Team';
 
 export { 
-    MapSchema,
-    RoleSchema,
-    CharacterSchema,
-    PlayerSchema,
-    LineupSchema,
-    TeamSchema
+    Map,
+    Role,
+    Character,
+    Player,
+    Lineup,
+    Team
  }

@@ -8,4 +8,6 @@ const CharacterSchema = new mongoose.Schema({
     }
 });
 
-export default CharacterSchema
+const Character = mongoose.model('Character', CharacterSchema);
+
+export { CharacterSchema, Character }

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import LineupSchema from './Lineup';
+import { LineupSchema } from './Lineup';
 
 const staffMemberSchema = new mongoose.Schema({
     player: {
@@ -15,4 +15,6 @@ const TeamSchema = new mongoose.Schema({
     staffMembers: [staffMemberSchema]
 });
 
-export default TeamSchema
+const Team = mongoose.model('Team', TeamSchema);
+
+export default { TeamSchema, Team }
