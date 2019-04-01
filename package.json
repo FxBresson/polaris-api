@@ -18,6 +18,8 @@
     "express": "^4.13.3",
     "express-graphql": "^0.7.1",
     "graphql": "^14.2.1",
+    "graphql-compose": "^6.1.0",
+    "graphql-compose-mongoose": "^6.0.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.4.20",
     "nodemon": "^1.18.10",
