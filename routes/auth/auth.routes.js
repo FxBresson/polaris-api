@@ -1,6 +1,8 @@
 // passport.authenticate middleware is used here to authenticate the request
 import express from 'express';
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+
+import { sendUnauthorizedErrorResponse, sendApiSuccessResponse } from '../../services/response.service'
 
 const authRouter = ({passport}) => {
     // Inject Passport to secure routes
@@ -14,20 +16,28 @@ const authRouter = ({passport}) => {
             authenticator(req, res, next)
         }
     );
-    
-    // The middleware receives the data from Bnet and runs the function on Strategy config
-    router.get('/bnet/callback', passport.authenticate('bnet'), (req, res) => {
-        console.log('callback -------------------------------------------------------')
-        // res.redirect('/secret')
-        let state = JSON.parse(Buffer.from(req.query.state, 'base64').toString())
-        let user = req._passport.session.user
-        res.redirect(state.url+'?token=' + jwt.sign({user: user}, process.env.JWT_SECRET))
-        // res.json({
-        //     success: true,
-        //     token: 'JWT ' + jwt.sign({user: user}, process.env.JWT_SECRET),
-        //     user: user
-        // })
-        console.log('-------------------------------------------------------')
+
+    router.get('/bnet/callback', (req, res, next) => {
+        passport.authenticate('bnet', (err, user, info) => {
+            console.log('callback -------------------------------------------------------')
+            let state = JSON.parse(Buffer.from(req.query.state, 'base64').toString())
+            
+            if (err || !user) {
+                if (state && state.url) {
+                    return res.redirect(`${state.url}?unauthorized=true`)
+                } else {
+                    return sendUnauthorizedErrorResponse(res, 'User not in DB', err)
+                }
+            } else {
+                let token = jwt.sign({user: user}, process.env.JWT_SECRET);
+                if (state && state.url) {
+                    return res.redirect(`${state.url}?token=${token}`)
+                } else {
+                    return sendApiSuccessResponse(res, 'Login', {token: token, user: user})
+                }
+            }
+            console.log('-------------------------------------------------------')
+        })(req, res, next);
     });
 
     return router;

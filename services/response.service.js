@@ -9,19 +9,19 @@ const sendBodyError = (response, errorMessage) => {
     });
 }
 
-const sendFieldsError = (response, errorMessage, miss, extra) => {
-    return response.status(400).json({
-        message: errorMessage,
-        err: { miss, extra },
-        data: null,
-    });
-}
-
 const sendApiSuccessResponse = (response, successMessage, data) => {
     return response.status(200).json({
         message: successMessage,
         err: null,
         data: data,
+    })
+}
+
+const sendUnauthorizedErrorResponse = (response, errorMessage, error) => {
+    return response.status(401).json({
+        message: errorMessage,
+        error,
+        data: null,
     })
 }
 
@@ -37,7 +37,7 @@ const sendApiErrorResponse = (response, errorMessage, error) => {
 
 export {
     sendBodyError,
-    sendFieldsError,
     sendApiSuccessResponse,
-    sendApiErrorResponse
+    sendUnauthorizedErrorResponse,
+    sendApiErrorResponse,
 };

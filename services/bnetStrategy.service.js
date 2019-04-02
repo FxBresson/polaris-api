@@ -7,7 +7,7 @@ import BnetStrategy from 'passport-bnet'
 import { Strategy as JwTStrategy, ExtractJwt } from 'passport-jwt'
 
 // Models
-import User from '../models/user'
+import { Player } from '../models/Player'
 
 
 // Strategy config
@@ -22,22 +22,19 @@ passport.use(new BnetStrategy({
 (accessToken, refreshToken, profile, done) => {
 
   var searchQuery = {
-    battletag: profile.battletag
+    mainBtag: profile.battletag
   };
 
   var updates = {
-    battletag: profile.battletag,
     profileId: profile.id,
-    token: accessToken
   };
 
   var options = {
-    upsert: true,
     new: true
   };
 
   // update the user if s/he exists or add a new user
-  User.findOneAndUpdate(searchQuery, updates, options, (err, user) => {
+  Player.findOneAndUpdate(searchQuery, updates, options, (err, user) => {
     if(err) {
       return done(err);
     } else {
@@ -53,7 +50,7 @@ passport.use(new JwTStrategy({
   secretOrKey: process.env.JWT_SECRET,
   ignoreExpiration: true,
 }, (jwt_payload, done) => {
-  User.findById(jwt_payload._doc._id, (err, user) => {
+  Player.findById(jwt_payload._doc._id, (err, user) => {
       if (err) {
           return done(err, false)
       }
@@ -66,13 +63,13 @@ passport.use(new JwTStrategy({
 }));
 
 // Used to stuff a piece of information into a cookie
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+// passport.serializeUser((user, done) => {
+//   done(null, user);
+// });
 
 // Used to decode the received cookie and persist session
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
+// passport.deserializeUser((user, done) => {
+//   done(null, user);
+// });
 
 export default passport;
