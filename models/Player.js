@@ -7,9 +7,11 @@ const BnetAccountSchema = new mongoose.Schema({
 })
 
 const PlayerSchema = new mongoose.Schema({
-    mainBtag: String,
+    mainBtag: {
+        type: String,
+        required: true
+    },
     bnetProfileId: String,
-    token: String,
     objectives: String,
     discordAccount: String,
     role: {

@@ -10,8 +10,10 @@ const staffMemberSchema = new mongoose.Schema({
 })
 
 const TeamSchema = new mongoose.Schema({
-    name: String,
-    lineups: [LineupSchema],
+    name: {
+        type: String,
+        required: true
+    },
     staffMembers: [staffMemberSchema]
 });
 

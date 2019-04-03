@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
 const RoleSchema = new mongoose.Schema({
-    name: String
+    name: {
+        type: String,
+        required: true
+    }
 });
 
 const Role = mongoose.model('Role', RoleSchema);

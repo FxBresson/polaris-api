@@ -1,7 +1,13 @@
 import mongoose from 'mongoose';
 
 const MapSchema = new mongoose.Schema({
-    name: String
+    name: {
+        type: String,
+        unique: true
+    },
+    mapTypes: [String],
+    thumbnail: String,
+    flagUrl: String
 });
 
 const Map = mongoose.model('Map', MapSchema);
