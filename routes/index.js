@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from '../services/bnetStrategy.service'
-import apiResponse from '../services/apiResponse.service'
+import { sendApiSuccessResponse } from '../services/response.service';
 import authRouter from './auth/auth.routes'
 
 const mainRouter = express.Router();
