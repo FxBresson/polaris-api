@@ -8,18 +8,22 @@ const authRouter = ({passport}) => {
     // Inject Passport to secure routes
     let router = express.Router();
 
+    router.get('/getbottoken', passport.authenticate('jwt', {session:false}), (req, res) => {
+        console.log(req.user)
+        let token = jwt.sign({bot: true}, process.env.JWT_SECRET)
+        return sendApiSuccessResponse(res, 'Bot token provided', {token: token})
+    })
+
     router.get('/bnet', (req, res, next) => {
-            const authenticator = passport.authenticate('bnet', {
-                scope: ['profile'], // Used to specify the required data
-                state: Buffer.from(JSON.stringify(req.query)).toString('base64')
-            })
-            authenticator(req, res, next)
-        }
-    );
+        const authenticator = passport.authenticate('bnet', {
+            scope: ['profile'], // Used to specify the required data
+            state: Buffer.from(JSON.stringify(req.query)).toString('base64')
+        })
+        authenticator(req, res, next)
+    });
 
     router.get('/bnet/callback', (req, res, next) => {
         passport.authenticate('bnet', (err, user, info) => {
-            console.log('callback -------------------------------------------------------')
             let state = JSON.parse(Buffer.from(req.query.state, 'base64').toString())
             
             if (err || !user) {
@@ -36,11 +40,10 @@ const authRouter = ({passport}) => {
                     return sendApiSuccessResponse(res, 'Login', {token: token, user: user})
                 }
             }
-            console.log('-------------------------------------------------------')
         })(req, res, next);
     });
 
     return router;
 }
 
-export default authRouter
+export default authRouter;
