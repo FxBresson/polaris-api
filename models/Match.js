@@ -5,9 +5,12 @@ const MatchSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
+    sr: Number,
+    teamSr: Number,
     lineup: {
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Lineup'
+        ref: 'Lineup',
+        required: true
     },
     type: {
         type: String,
@@ -15,12 +18,16 @@ const MatchSchema = new mongoose.Schema({
         required: true
     },
     players: [{type: mongoose.Schema.Types.ObjectId, ref: 'Player'}],
-    result: {
-        win: Boolean,
-        winNb: Number,
-        drawNb: Number,
-        loseNb: Number 
-    },
+    result: [
+        {
+            map: {
+                type: mongoose.Schema.Types.ObjectId, 
+                ref: 'Map'
+            },
+            score: Number,
+            enemyScore: Number
+        }
+    ],
     vod: [String],
     debrief: String
 })

@@ -1,17 +1,23 @@
 import mongoose from 'mongoose';
 
 const CompSchema = new mongoose.Schema({
-    phase: String,
+    name: String,
     comp: [{type: mongoose.Schema.Types.ObjectId, ref: 'Character' }]
 })
 
 const StratSchema = new mongoose.Schema({
+    lineup: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Lineup',
+        required: true
+    },
     map: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Map',
         required: true
     },
-    comp: [CompSchema],
+    compAttack: [CompSchema],
+    compDefense: [CompSchema],
     comments: String
 })
 
