@@ -16,7 +16,7 @@ const app = express();
 const port = process.env.PORT;
 
 
-app.use(bodyParser.urlencoded({ extended: true }))
+// app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 app.use(passport.initialize()); // Used to initialize passport
 
