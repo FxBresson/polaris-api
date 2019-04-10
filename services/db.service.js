@@ -4,7 +4,12 @@ import {} from 'dotenv/config'
 
 const initClient = () => {
     return new Promise( (resolve, reject) => {
-        mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true })
+        let mongoOptions = {
+            useCreateIndex: true,
+            useNewUrlParser: true,
+            useFindAndModify: false
+        }
+        mongoose.connect(process.env.MONGO_URL, mongoOptions)
         var db = mongoose.connection;
         db.on('error', (err) => {
             reject("Mongoose default connection has occured "+err+" error");
