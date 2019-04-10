@@ -28,6 +28,7 @@
     "mongoose": "^5.4.21",
     "node-fetch": "^2.3.0",
     "nodemon": "^1.18.10",
+    "overwatch-api": "^0.7.5",
     "passport": "^0.4.0",
     "passport-bnet": "^2.0.0",
     "passport-jwt": "^4.0.0"
