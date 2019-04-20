@@ -7,8 +7,7 @@ import BnetStrategy from 'passport-bnet'
 import { Strategy as JwTStrategy, ExtractJwt } from 'passport-jwt'
 
 // Models
-import { Player } from '../models/Player'
-
+import { Player } from '../models/index'
 
 // Strategy config
 passport.use(new BnetStrategy({
@@ -21,15 +20,15 @@ passport.use(new BnetStrategy({
 // bnet sends back the tokens and profile info
 (accessToken, refreshToken, profile, done) => {
 
-  var searchQuery = {
+  let searchQuery = {
     mainBtag: profile.battletag
   };
 
-  var updates = {
-    profileId: profile.id,
+  let updates = {
+    bnetProfileId: profile.id,
   };
 
-  var options = {
+  let options = {
     new: true
   };
 
@@ -50,7 +49,11 @@ passport.use(new JwTStrategy({
   secretOrKey: process.env.JWT_SECRET,
   ignoreExpiration: true,
 }, (jwt_payload, done) => {
-  Player.findById(jwt_payload._doc._id, (err, user) => {
+  if (jwt_payload.bot) {
+    return done(null, {bot: true})
+  }
+  if(jwt_payload.user && jwt_payload.user._id) {
+    Player.findById(jwt_payload.user._id, (err, user) => {
       if (err) {
           return done(err, false)
       }
@@ -59,7 +62,10 @@ passport.use(new JwTStrategy({
       } else {
           return done(null, false)
       }
-  });
+    });
+  } else {
+    return done({err: 'No user'}, false)
+  }
 }));
 
 // Used to stuff a piece of information into a cookie

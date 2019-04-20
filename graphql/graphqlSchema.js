@@ -15,7 +15,6 @@ import {
     Match,
     Team 
 } from '../models';
-import { start } from 'repl';
 
 // STEP 2: CONVERT MONGOOSE MODEL TO GraphQL PIECES
 const customizationOptions = {}; // left it empty for simplicity, described below
@@ -38,105 +37,107 @@ LineupTC.addRelation('strats', {
 LineupTC.addRelation('players', {
   resolver: () => PlayerTC.getResolver('findMany'),
   prepareArgs: { 
-    lineup: (source) => source._id,
+    filter: (source, args, context, info) => ({
+      _operators : { 
+        _id: { ne: context.user._id }
+      },
+      lineup: source._id,
+      status: 'Player'
+    }),
   },
   projection: { _id: 1 }, 
 })
-LineupTC.addRelation(
-  'matchHistory',
-  {
-    resolver: () => MatchTC.get('$findMany'), // shorthand for `UserTC.getResolver('findMany')`
-    prepareArgs: { // resolver `findMany` has `filter` arg, we may provide mongoose query to it
-      filter: (source) => ({
-        _operators : { // Applying criteria on fields which have
-                       // operators enabled for them (by default, indexed fields only)
-          date: { lte: moment() }
-        },
-        lineup: source._id,
-      }),
-    },
-    projection: { friendsIds: 1, gender: 1 }, // required fields from source object
-  }
-);
-LineupTC.addRelation(
-  'matchSchedule',
-  {
-    resolver: () => MatchTC.get('$findMany'), // shorthand for `UserTC.getResolver('findMany')`
-    prepareArgs: { // resolver `findMany` has `filter` arg, we may provide mongoose query to it
-      filter: (source) => ({
-        _operators : { // Applying criteria on fields which have
-                       // operators enabled for them (by default, indexed fields only)
-          date: { gte: moment() }
-        },
-        lineup: source._id,
-      }),
-    },
-    projection: { friendsIds: 1, gender: 1 }, // required fields from source object
-  }
-);
-
-
-LineupTC.addResolver({
-    name: 'updateDoodle',
-    kind: 'mutation',
-    type: LineupTC.getResolver('updateOne').getType(),
-    args: { weekDisponibilities: ['Boolean'], lineupId: mongoid },
-    resolve: async ({ source, args, context, info }) => {
-        let date = moment();
-        let update = {};
-        let path = `planning.doodle.${date.year()}.${date.week()}.${source.user.mainBtag}`
-        update[path] = args.weekDisponibilities;
-        let lineup = await Lineup.findByIdAndUpdate(args.lineupId, {$set: update}).exec()
-        return {
-            record: lineup,
-            recordId: lineup._id
-        };
-    }
+LineupTC.addRelation('currentPlayer', {
+  resolver: () => PlayerTC.getResolver('findById'),
+  prepareArgs: { 
+    _id: (source, args, context, info) => context.user._id,
+  },
+  projection: { _id: 1 }, 
+})
+LineupTC.addRelation('matchHistory', {
+  resolver: () => MatchTC.get('$findMany'), // shorthand for `UserTC.getResolver('findMany')`
+  prepareArgs: { // resolver `findMany` has `filter` arg, we may provide mongoose query to it
+    filter: (source) => ({
+      _operators : { // Applying criteria on fields which have operators enabled for them (by default, indexed fields only)
+        date: { lte: moment() }
+      },
+      lineup: source._id,
+    }),
+  },
+  projection: { _id: 1 }, // required fields from source object
+});
+LineupTC.addRelation('matchSchedule', {
+  resolver: () => MatchTC.get('$findMany'),
+  prepareArgs: { 
+    filter: (source) => ({
+      _operators : {
+        date: { gte: moment() }
+      },
+      lineup: source._id,
+    }),
+  },
+  projection: { _id: 1 }, 
 });
 
+PlayerTC.addRelation('role', {
+  resolver: () => RoleTC.getResolver('findById'),
+  prepareArgs: { 
+    _id: (source) => source.role,
+  },
+  projection: { _id: 1 }, 
+})
+PlayerTC.addFields({
+  name: { 
+    type: 'String',
+    description: 'Player name',
+    resolve: (source, args, context, info) => source.mainBtag.split('#')[0],
+  },
+})
 
-StratTC.addResolver({
-    name: 'addCompToMapStrat',
-    kind: 'mutation',
-    type: LineupTC.getResolver('updateOne').getType(),
-    args: { newComp: GraphQLJSON, strat_id: mongoid },
-    resolve: async ({ source, args, context, info }) => {
-        let strat = await Strat.findByIdAndUpdate(args.strat_id, {$push: {comp: args.newComp}}).exec()
-        return {
-            records: strat
-        }
-    }
-});
 
-StratTC.addResolver({
-    name: 'updateCompOfMapStrat',
-    kind: 'mutation',
-    type: LineupTC.getResolver('updateOne').getType(),
-    args: { newComp: GraphQLJSON, comp_id: mongoid, strat_id: mongoid },
-    resolve: async ({ source, args, context, info }) => {
-        let update = {}
-        update[`comp.${args.comp_id}`] = args.newComp; 
-        let strat = await Strat.findByIdAndUpdate(args.strat_id, {$set: {update}}).exec()
-        return {
-            records: strat
-        }
-    }
-});
 
-StratTC.addResolver({
-    name: 'deleteCompFromMapStrat',
-    kind: 'mutation',
-    type: LineupTC.getResolver('updateOne').getType(),
-    args: { comp_id: mongoid, strat_id: mongoid },
-    resolve: async ({ source, args, context, info }) => {
-        let stratOld = await Start.findById(args.strat_id).exec()
-        stratOld.comp.id(args.comp_id).remove();
-        let strat = await stratOld.save();
-        return {
-            records: strat
-        }
-    }
-});
+// StratTC.addResolver({
+//     name: 'addCompToMapStrat',
+//     kind: 'mutation',
+//     type: StratTC.getResolver('updateOne').getType(),
+//     args: { newComp: GraphQLJSON, strat_id: mongoid },
+//     resolve: async ({ source, args, context, info }) => {
+//         let strat = await Strat.findByIdAndUpdate(args.strat_id, {$push: {comp: args.newComp}}).exec()
+//         return {
+//             records: strat
+//         }
+//     }
+// });
+
+// StratTC.addResolver({
+//     name: 'updateCompOfMapStrat',
+//     kind: 'mutation',
+//     type: StratTC.getResolver('updateOne').getType(),
+//     args: { newComp: GraphQLJSON, comp_id: mongoid, strat_id: mongoid },
+//     resolve: async ({ source, args, context, info }) => {
+//         let update = {}
+//         update[`comp.${args.comp_id}`] = args.newComp; 
+//         let strat = await Strat.findByIdAndUpdate(args.strat_id, {$set: {update}}).exec()
+//         return {
+//             records: strat
+//         }
+//     }
+// });
+
+// StratTC.addResolver({
+//     name: 'deleteCompFromMapStrat',
+//     kind: 'mutation',
+//     type: StratTC.getResolver('updateOne').getType(),
+//     args: { comp_id: mongoid, strat_id: mongoid },
+//     resolve: async ({ source, args, context, info }) => {
+//         let stratOld = await Start.findById(args.strat_id).exec()
+//         stratOld.comp.id(args.comp_id).remove();
+//         let strat = await stratOld.save();
+//         return {
+//             records: strat
+//         }
+//     }
+// });
 
 // STEP 3: Add needed CRUD User operations to the GraphQL Schema
 // via graphql-compose it will be much much easier, with less typing
@@ -151,8 +152,9 @@ schemaComposer.Query.addFields({
     characterOne: CharacterTC.getResolver('findOne'),
     characterMany: CharacterTC.getResolver('findMany'),
     //Strat
-    stratMany: StratTC.getResolver('findMany'),
+      //stratMany: StratTC.getResolver('findMany'),
     //Player
+    playerOne: PlayerTC.getResolver('findOne'),
     playerById: PlayerTC.getResolver('findById'),
     playersByIds: PlayerTC.getResolver('findByIds'),
     //Lineup
@@ -174,15 +176,11 @@ schemaComposer.Mutation.addFields({
     //Strat
     stratCreateOne: StratTC.getResolver('createOne'),
     stratUpdateById: StratTC.getResolver('updateById'),
-    stratRemoveById: StratTC.getResolver('removeById'),
-    addCompToMapStrat: StratTC.getResolver('addCompToMapStrat'),
-    updateCompOfMapStrat: StratTC.getResolver('updateCompOfMapStrat'),
-    deleteCompFromMapStrat: StratTC.getResolver('deleteCompFromMapStrat'),
+      // addCompToMapStrat: StratTC.getResolver('addCompToMapStrat'),
+      // updateCompOfMapStrat: StratTC.getResolver('updateCompOfMapStrat'),
+      // deleteCompFromMapStrat: StratTC.getResolver('deleteCompFromMapStrat'),
     //Lineup
-    lineupCreateOne: LineupTC.getResolver('createOne'),
     lineupUpdateById: LineupTC.getResolver('updateById'),
-    lineupRemoveById: LineupTC.getResolver('removeById'),
-    updateDoodle: LineupTC.getResolver('updateDoodle'),
     //Match
     matchCreateOne: MatchTC.getResolver('createOne'),
     matchUpdateById: MatchTC.getResolver('updateById'),
