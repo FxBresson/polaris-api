@@ -3,6 +3,17 @@ import mongoose from 'mongoose';
 const PlayerSchema = new mongoose.Schema({
     mainBtag: {
         type: String,
+        required: true,
+        unique: true
+    },
+    lineup: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Lineup',
+        required: true
+    },
+    status: {
+        type: [String],
+        enum: ['Player', 'Candidate', 'Captain', 'Coach', 'Staff', 'Founder'],
         required: true
     },
     doodle: {
@@ -15,14 +26,6 @@ const PlayerSchema = new mongoose.Schema({
     role: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Role'
-    },
-    lineup: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Lineup',
-    },
-    status: {
-        type: [String],
-        enum: ['Player', 'Candidate', 'Captain', 'Coach', 'Staff']
     },
     profile: {
         level: Number,

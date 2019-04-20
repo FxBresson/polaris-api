@@ -17,7 +17,7 @@ const MatchSchema = new mongoose.Schema({
         enum: ['Scrim', 'Tournament', 'Ranked'],
         required: true
     },
-    players: [{type: mongoose.Schema.Types.ObjectId, ref: 'Player'}],
+    // players: [{type: mongoose.Schema.Types.ObjectId, ref: 'Player'}],
     result: [
         {
             map: {

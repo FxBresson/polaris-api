@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 const CompSchema = new mongoose.Schema({
     name: String,
-    comp: [{type: mongoose.Schema.Types.ObjectId, ref: 'Character' }]
+    characters: [{type: mongoose.Schema.Types.ObjectId, ref: 'Character' }],
+    isDefense: {
+        type: Boolean,
+        required: true
+    }
 })
 
 const StratSchema = new mongoose.Schema({
@@ -16,9 +20,11 @@ const StratSchema = new mongoose.Schema({
         ref: 'Map',
         required: true
     },
-    compAttack: [CompSchema],
-    compDefense: [CompSchema],
-    comments: String
+    comps: [CompSchema],
+    comments: {
+        type: String,
+        default: ''
+    }
 })
 
 
