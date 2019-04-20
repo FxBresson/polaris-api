@@ -7,10 +7,7 @@ const LineupSchema = new mongoose.Schema({
     },
     description: String,
     objectives: String,
-    planning: {
-        defined: [false, false, false, false, false, false, false],
-        doodle: {}
-    },
+    definedPlanning: [Boolean]
 });
 
 const Lineup = mongoose.model('Lineup', LineupSchema);

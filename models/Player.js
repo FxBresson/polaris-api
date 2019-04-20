@@ -5,6 +5,10 @@ const PlayerSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    doodle: {
+        type: [Number],
+        default: Array(28).fill(0, 0, 28)
+    },
     bnetProfileId: String,
     objectives: String,
     discordAccount: String,
@@ -29,7 +33,11 @@ const PlayerSchema = new mongoose.Schema({
         levelFrame: String,
         levelStars: String
     },
-    lastStats: {}
+    lastStats: {},
+    defaultAvailability: {
+        type: Number,
+        default: 0
+    }
 });
 
 const Player = mongoose.model('Player', PlayerSchema);
