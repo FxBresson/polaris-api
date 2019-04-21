@@ -47,13 +47,13 @@ LineupTC.addRelation('players', {
   },
   projection: { _id: 1 }, 
 })
-LineupTC.addRelation('currentPlayer', {
-  resolver: () => PlayerTC.getResolver('findById'),
-  prepareArgs: { 
-    _id: (source, args, context, info) => context.user._id,
-  },
-  projection: { _id: 1 }, 
-})
+// LineupTC.addRelation('currentPlayer', {
+//   resolver: () => PlayerTC.getResolver('findById'),
+//   prepareArgs: { 
+//     _id: (source, args, context, info) => context.user._id,
+//   },
+//   projection: { _id: 1 }, 
+// })
 LineupTC.addRelation('matchHistory', {
   resolver: () => MatchTC.get('$findMany'), // shorthand for `UserTC.getResolver('findMany')`
   prepareArgs: { // resolver `findMany` has `filter` arg, we may provide mongoose query to it
@@ -90,8 +90,22 @@ PlayerTC.addFields({
   name: { 
     type: 'String',
     description: 'Player name',
-    resolve: (source, args, context, info) => source.mainBtag.split('#')[0],
+    resolve: (source, args, context, info) => {
+      console.log(source)
+      return source.mainBtag.split('#')[0]
+    }
   },
+})
+
+PlayerTC.addResolver({
+  name: 'playerLogin',
+  kind: 'query',
+  type: PlayerTC,
+  resolve: async ({source, args, context, info}) => {
+    console.log(context.user)
+    let player = await Player.findById(context.user._id)
+    return player
+  }
 })
 
 
@@ -154,6 +168,7 @@ schemaComposer.Query.addFields({
     //Strat
       //stratMany: StratTC.getResolver('findMany'),
     //Player
+    playerLogin: PlayerTC.getResolver('playerLogin'),
     playerOne: PlayerTC.getResolver('findOne'),
     playerById: PlayerTC.getResolver('findById'),
     playersByIds: PlayerTC.getResolver('findByIds'),
