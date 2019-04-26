@@ -98,12 +98,18 @@ PlayerTC.addRelation('role', {
   },
   projection: { _id: 1 }, 
 })
+PlayerTC.addRelation('lineup', {
+  resolver: () => LineupTC.getResolver('findById'),
+  prepareArgs: { 
+    _id: (source) => source.lineup,
+  },
+  projection: { _id: 1 }, 
+})
 PlayerTC.addFields({
   name: { 
     type: 'String',
     description: 'Player name',
     resolve: (source, args, context, info) => {
-      console.log(source)
       return source.mainBtag.split('#')[0]
     }
   },
