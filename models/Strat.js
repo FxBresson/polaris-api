@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 
 const CompSchema = new mongoose.Schema({
     name: String,
-    characters: [{type: mongoose.Schema.Types.ObjectId, ref: 'Character' }],
+    characters: {
+        type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Character' }],
+        default: Array(6).fill(null)
+    },
     isDefense: {
         type: Boolean,
         required: true
@@ -20,7 +23,10 @@ const StratSchema = new mongoose.Schema({
         ref: 'Map',
         required: true
     },
-    comps: [CompSchema],
+    comps: {
+        type: [CompSchema],
+        default: []
+    },
     comments: {
         type: String,
         default: ''
