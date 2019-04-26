@@ -83,6 +83,14 @@ LineupTC.addRelation('matchSchedule', {
   projection: { _id: 1 }, 
 });
 
+CharacterTC.addRelation('role', {
+  resolver: () => RoleTC.getResolver('findById'),
+  prepareArgs: { 
+    _id: (source) => source.role,
+  },
+  projection: { _id: 1 }, 
+})
+
 PlayerTC.addRelation('role', {
   resolver: () => RoleTC.getResolver('findById'),
   prepareArgs: { 
