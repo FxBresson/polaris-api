@@ -5,6 +5,10 @@ import GraphQLJSON from 'graphql-type-json';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import moment from 'moment';
 moment.locale(process.env.LOCALE)
+
+import {} from 'dotenv/config';
+const overwatch = require('overwatch-api');
+
 import { 
     Map,
     Role,
@@ -97,61 +101,51 @@ PlayerTC.addFields({
   },
 })
 
+const _findPlayerAndUpdate = (user) => {
+  return new Promise((resolve, reject) => {
+    overwatch.getProfile('pc', process.env.region, user.mainBtag.replace('#', '-'), (errP, jsonProfile) => {
+      overwatch.getStats('pc', process.env.region, user.mainBtag.replace('#', '-'), (errS, jsonStats) => {
+        let updates = {
+          profile: {
+            level: jsonProfile.level,
+            portrait: jsonProfile.portrait,
+            endorsement: jsonProfile.endorsement,
+            rank: jsonProfile.competitive.rank,
+            rank_img: jsonProfile.competitive.rank_img,
+            levelFrame: jsonProfile.levelFrame,
+            levelStars: jsonProfile.star
+          },
+          lastStats: jsonStats.stats
+        }
+        let options = {
+          new: true
+        }
+        
+        Player.findByIdAndUpdate(user._id, updates, options, (err, player) => {
+          resolve(player)
+        })
+      })
+    })  
+  })
+}
+
+const findPlayerAndUpdate = (user) => {
+  return new Promise((resolve, reject) => {
+    Player.findById(user._id, (err, player) => {
+      resolve(player)
+    })
+  })
+}
+
 PlayerTC.addResolver({
   name: 'playerLogin',
   kind: 'query',
   type: PlayerTC,
   resolve: async ({source, args, context, info}) => {
-    console.log(context.user)
-    let player = await Player.findById(context.user._id)
-    return player
+    return await findPlayerAndUpdate(context.user)
   }
 })
 
-
-
-// StratTC.addResolver({
-//     name: 'addCompToMapStrat',
-//     kind: 'mutation',
-//     type: StratTC.getResolver('updateOne').getType(),
-//     args: { newComp: GraphQLJSON, strat_id: mongoid },
-//     resolve: async ({ source, args, context, info }) => {
-//         let strat = await Strat.findByIdAndUpdate(args.strat_id, {$push: {comp: args.newComp}}).exec()
-//         return {
-//             records: strat
-//         }
-//     }
-// });
-
-// StratTC.addResolver({
-//     name: 'updateCompOfMapStrat',
-//     kind: 'mutation',
-//     type: StratTC.getResolver('updateOne').getType(),
-//     args: { newComp: GraphQLJSON, comp_id: mongoid, strat_id: mongoid },
-//     resolve: async ({ source, args, context, info }) => {
-//         let update = {}
-//         update[`comp.${args.comp_id}`] = args.newComp; 
-//         let strat = await Strat.findByIdAndUpdate(args.strat_id, {$set: {update}}).exec()
-//         return {
-//             records: strat
-//         }
-//     }
-// });
-
-// StratTC.addResolver({
-//     name: 'deleteCompFromMapStrat',
-//     kind: 'mutation',
-//     type: StratTC.getResolver('updateOne').getType(),
-//     args: { comp_id: mongoid, strat_id: mongoid },
-//     resolve: async ({ source, args, context, info }) => {
-//         let stratOld = await Start.findById(args.strat_id).exec()
-//         stratOld.comp.id(args.comp_id).remove();
-//         let strat = await stratOld.save();
-//         return {
-//             records: strat
-//         }
-//     }
-// });
 
 // STEP 3: Add needed CRUD User operations to the GraphQL Schema
 // via graphql-compose it will be much much easier, with less typing
@@ -203,8 +197,6 @@ schemaComposer.Mutation.addFields({
     //Team
     teamUpdateOne: TeamTC.getResolver('updateOne'),
 });
-
-
 
 
 const graphqlSchema = schemaComposer.buildSchema();
