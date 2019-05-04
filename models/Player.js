@@ -31,7 +31,10 @@ const PlayerSchema = new mongoose.Schema({
         level: Number,
         portrait: String,
         endorsement: {},
-        rank: Number,
+        rank: [{
+            date: Date,
+            srValue: Number
+        }],
         rank_img: String,
         levelFrame: String,
         levelStars: String

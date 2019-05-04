@@ -4,7 +4,7 @@ import { schemaComposer } from 'graphql-compose';
 import GraphQLJSON from 'graphql-type-json';
 import { GraphQLDateTime } from 'graphql-iso-date';
 import moment from 'moment';
-moment.locale(process.env.LOCALE)
+import 'moment/locale/fr';
 
 import {} from 'dotenv/config';
 const overwatch = require('overwatch-api');
@@ -51,6 +51,7 @@ LineupTC.addRelation('players', {
   },
   projection: { _id: 1 }, 
 })
+
 // LineupTC.addRelation('currentPlayer', {
 //   resolver: () => PlayerTC.getResolver('findById'),
 //   prepareArgs: { 
@@ -82,6 +83,8 @@ LineupTC.addRelation('matchSchedule', {
   },
   projection: { _id: 1 }, 
 });
+
+
 
 CharacterTC.addRelation('role', {
   resolver: () => RoleTC.getResolver('findById'),
@@ -118,13 +121,24 @@ PlayerTC.addFields({
 const _findPlayerAndUpdate = (user) => {
   return new Promise((resolve, reject) => {
     overwatch.getProfile('pc', process.env.region, user.mainBtag.replace('#', '-'), (errP, jsonProfile) => {
+      if (errP) return reject(errP)
       overwatch.getStats('pc', process.env.region, user.mainBtag.replace('#', '-'), (errS, jsonStats) => {
+        if (errS) return reject(errS) 
+
+        let rank = user.profile.rank || []
+        if (jsonProfile.competitive.rank && rank[0] && jsonProfile.competitive.rank !== rank[0].srValue) {
+          rank.unshift({
+            srValue: jsonProfile.competitive.rank,
+            date: moment(),
+          })
+        }
+        
         let updates = {
           profile: {
             level: jsonProfile.level,
             portrait: jsonProfile.portrait,
             endorsement: jsonProfile.endorsement,
-            rank: jsonProfile.competitive.rank,
+            rank: rank,
             rank_img: jsonProfile.competitive.rank_img,
             levelFrame: jsonProfile.levelFrame,
             levelStars: jsonProfile.star
@@ -136,28 +150,55 @@ const _findPlayerAndUpdate = (user) => {
         }
         
         Player.findByIdAndUpdate(user._id, updates, options, (err, player) => {
-          resolve(player)
+          if (err) return reject(err)
+          return resolve(player)
         })
       })
     })  
   })
 }
 
-const findPlayerAndUpdate = (user) => {
-  return new Promise((resolve, reject) => {
-    Player.findById(user._id, (err, player) => {
-      resolve(player)
-    })
-  })
-}
-
 PlayerTC.addResolver({
-  name: 'playerLogin',
+  name: 'updatePlayerData',
   kind: 'query',
   type: PlayerTC,
   resolve: async ({source, args, context, info}) => {
-    return await findPlayerAndUpdate(context.user)
+    console.log('updating player data')
+    return await _findPlayerAndUpdate(context.user)
   }
+})
+
+PlayerTC.addResolver({
+  name: 'loginPlayer',
+  kind: 'query',
+  type: PlayerTC,
+  resolve: async ({source, args, context, info}) => {
+    return await Player.findById(context.user._id)
+  }
+})
+
+LineupTC.addFields({
+  averageSr: { 
+    type: 'Int',
+    description: 'Average SR',
+    resolve: async (source, args, context, info) => {
+      const players = await Player.find({lineup: source._id, status: 'Player'}).exec()
+      let sr = players.reduce((arr, player) => player.profile.rank[0] ? [...arr, player.profile.rank[0].srValue] : arr, [])
+      return sr.length ? Math.round(sr/sr.length) : null
+    }
+  }
+})
+
+LineupTC.addRelation('otherLineups', {
+  resolver: () => LineupTC.getResolver('findMany'),
+  prepareArgs: { 
+    filter: (source, args, context, info) => ({
+      _operators : { 
+        _id: { ne: source._id }
+      },
+    }),
+  },
+  projection: { _id: 1 }, 
 })
 
 
@@ -176,7 +217,8 @@ schemaComposer.Query.addFields({
     //Strat
       //stratMany: StratTC.getResolver('findMany'),
     //Player
-    playerLogin: PlayerTC.getResolver('playerLogin'),
+    updatePlayerData: PlayerTC.getResolver('updatePlayerData'),
+    playerLogin: PlayerTC.getResolver('loginPlayer'),
     playerOne: PlayerTC.getResolver('findOne'),
     playerById: PlayerTC.getResolver('findById'),
     playersByIds: PlayerTC.getResolver('findByIds'),
