@@ -18,7 +18,7 @@ const PlayerSchema = new mongoose.Schema({
     },
     doodle: {
         type: [Number],
-        default: Array(28).fill(0, 0, 28)
+        default: Array(14).fill(0, 0, 14)
     },
     bnetProfileId: String,
     objectives: String,
