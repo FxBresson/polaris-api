@@ -37,7 +37,8 @@ passport.use(new BnetStrategy({
     if(err) {
       return done(err);
     } else {
-      return done(null, user);
+      let userObj = (({ _id }) => ({ _id }))(user)
+      return done(null, userObj);
     }
   });
 }
