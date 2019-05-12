@@ -68,6 +68,7 @@ LineupTC.addRelation('matchHistory', {
       },
       lineup: source._id,
     }),
+    sort: (source) => ({ date: -1 })
   },
   projection: { _id: 1 }, // required fields from source object
 });
@@ -80,6 +81,7 @@ LineupTC.addRelation('matchSchedule', {
       },
       lineup: source._id,
     }),
+    sort: (source) => ({ date: 1 })
   },
   projection: { _id: 1 }, 
 });
@@ -163,7 +165,6 @@ PlayerTC.addResolver({
   kind: 'query',
   type: PlayerTC,
   resolve: async ({source, args, context, info}) => {
-    console.log('updating player data')
     return await _findPlayerAndUpdate(context.user)
   }
 })

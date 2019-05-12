@@ -9,7 +9,6 @@ const authRouter = ({passport}) => {
     let router = express.Router();
 
     router.get('/getbottoken', passport.authenticate('jwt', {session:false}), (req, res) => {
-        console.log(req.user)
         let token = jwt.sign({bot: true}, process.env.JWT_SECRET)
         return sendApiSuccessResponse(res, 'Bot token provided', {token: token})
     })
