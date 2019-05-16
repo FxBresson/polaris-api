@@ -128,11 +128,13 @@ const _findPlayerAndUpdate = (user) => {
         if (errS) return reject(errS) 
 
         let rank = user.profile.rank || []
-        if (jsonProfile.competitive.rank && rank[0] && jsonProfile.competitive.rank !== rank[0].srValue) {
-          rank.unshift({
-            srValue: jsonProfile.competitive.rank,
-            date: moment(),
-          })
+        if (jsonProfile.competitive.rank) {
+          if (rank[0] && jsonProfile.competitive.rank !== rank[0].srValue || !rank[0]) {
+            rank.unshift({
+              srValue: jsonProfile.competitive.rank,
+              date: moment(),
+            })
+          }
         }
         
         let updates = {
@@ -205,6 +207,8 @@ LineupTC.addRelation('otherLineups', {
 
 // STEP 3: Add needed CRUD User operations to the GraphQL Schema
 // via graphql-compose it will be much much easier, with less typing
+
+//Query
 schemaComposer.Query.addFields({
     //Map
     mapOne: MapTC.getResolver('findOne'),
@@ -215,8 +219,6 @@ schemaComposer.Query.addFields({
     //Character
     characterOne: CharacterTC.getResolver('findOne'),
     characterMany: CharacterTC.getResolver('findMany'),
-    //Strat
-      //stratMany: StratTC.getResolver('findMany'),
     //Player
     updatePlayerData: PlayerTC.getResolver('updatePlayerData'),
     playerLogin: PlayerTC.getResolver('loginPlayer'),
@@ -232,7 +234,7 @@ schemaComposer.Query.addFields({
     //Team
     team: TeamTC.getResolver('findOne'),
 });
-
+//Mutations
 schemaComposer.Mutation.addFields({
     //Player
     playerCreateOne: PlayerTC.getResolver('createOne'),
@@ -242,9 +244,6 @@ schemaComposer.Mutation.addFields({
     //Strat
     stratCreateOne: StratTC.getResolver('createOne'),
     stratUpdateById: StratTC.getResolver('updateById'),
-      // addCompToMapStrat: StratTC.getResolver('addCompToMapStrat'),
-      // updateCompOfMapStrat: StratTC.getResolver('updateCompOfMapStrat'),
-      // deleteCompFromMapStrat: StratTC.getResolver('deleteCompFromMapStrat'),
     //Lineup
     lineupUpdateById: LineupTC.getResolver('updateById'),
     //Match
