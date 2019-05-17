@@ -187,7 +187,7 @@ LineupTC.addFields({
     resolve: async (source, args, context, info) => {
       const players = await Player.find({lineup: source._id, status: 'Player'}).exec()
       let sr = players.reduce((arr, player) => player.profile.rank[0] ? [...arr, player.profile.rank[0].srValue] : arr, [])
-      return sr.length ? Math.round(sr/sr.length) : null
+      return sr.length ? Math.round(sr.reduce((a,b)=>a+b)/sr.length) : null
     }
   }
 })
