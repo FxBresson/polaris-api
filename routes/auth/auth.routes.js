@@ -26,14 +26,20 @@ const authRouter = ({passport}) => {
             let state = JSON.parse(Buffer.from(req.query.state, 'base64').toString())
             
             if (err || !user) {
-                if (state && state.url) {
+                if (state && state.url && state.useCookie) {
+                    res.cookie('token', false)
+                    return res.redirect(`${state.url}`)
+                } else if (state && state.url) {
                     return res.redirect(`${state.url}?unauthorized=true`)
                 } else {
                     return sendUnauthorizedErrorResponse(res, 'User not in DB', err)
                 }
             } else {
                 let token = jwt.sign({user: user}, process.env.JWT_SECRET);
-                if (state && state.url) {
+                if (state && state.url && state.useCookie) {
+                    res.cookie('token', token)
+                    return res.redirect(`${state.url}`)
+                } else if (state && state.url) {
                     return res.redirect(`${state.url}?token=${token}`)
                 } else {
                     return sendApiSuccessResponse(res, 'Login', {token: token, user: user})
