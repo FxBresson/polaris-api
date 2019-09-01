@@ -48,6 +48,7 @@ LineupTC.addRelation('players', {
       lineup: source._id,
       status: 'Player'
     }),
+    sort: (source) => ({ displayOrder: 1 })
   },
   projection: { _id: 1 }, 
 })
