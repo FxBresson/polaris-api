@@ -27,6 +27,7 @@ const PlayerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Role'
     },
+    displayOrder: Number,
     profile: {
         level: Number,
         portrait: String,
