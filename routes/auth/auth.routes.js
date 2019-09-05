@@ -27,7 +27,7 @@ const authRouter = ({passport}) => {
             
             if (err || !user) {
                 if (state && state.url && state.useCookie) {
-                    res.cookie('token', false)
+                    res.cookie('token', false, {domain: '.polaris.team'})
                     return res.redirect(`${state.url}`)
                 } else if (state && state.url) {
                     return res.redirect(`${state.url}?unauthorized=true`)
@@ -37,7 +37,7 @@ const authRouter = ({passport}) => {
             } else {
                 let token = jwt.sign({user: user}, process.env.JWT_SECRET);
                 if (state && state.url && state.useCookie) {
-                    res.cookie('token', token)
+                    res.cookie('token', token, {domain: '.polaris.team'})
                     return res.redirect(`${state.url}`)
                 } else if (state && state.url) {
                     return res.redirect(`${state.url}?token=${token}`)
