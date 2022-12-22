@@ -23,7 +23,7 @@
     "graphql-compose-mongoose": "^6.0.2",
     "graphql-iso-date": "^3.6.1",
     "graphql-type-json": "^0.2.4",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "moment": "^2.24.0",
     "mongoose": "^5.4.21",
     "node-fetch": "^2.3.0",
